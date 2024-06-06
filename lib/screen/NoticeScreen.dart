@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_application/screen/notice_board.dart';
+import 'package:firebase_application/utils/button_c.dart';
 import 'package:firebase_application/utils/textform-field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neumorphic_ui/neumorphic_ui.dart';
 import '../Model/section_model.dart';
 
 class NoticeScreen extends StatefulWidget {
@@ -21,6 +20,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
   String cSelectedvalue = '';
   List<Section> section = [];
   TimeOfDay selectedTime = TimeOfDay.now();
+  bool isloading = false;
 
   final teacherController = TextEditingController();
   final courseController = TextEditingController();
@@ -36,7 +36,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
 
   Future<void> fetchTeachers() async {
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('teachers').get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('teachers').limit(10).get();
       List<DropdownMenuItem<String>> teachers = snapshot.docs.map((doc) {
         String teacherName = doc['name'];
         return DropdownMenuItem<String>(
@@ -54,7 +54,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
 
   Future<void> fetchCourses() async {
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('courses').get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('courses').limit(10).get();
       List<DropdownMenuItem<String>> courses = snapshot.docs.map((doc) {
         String courseName = doc['courses'];
         return DropdownMenuItem<String>(
@@ -84,14 +84,18 @@ class _NoticeScreenState extends State<NoticeScreen> {
               });
             },
           ),
+          SizedBox(
+            width: size.width/20,
+          )
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.only(left: 15,right: 15,top: 20),
         child: ListView(
-          padding: EdgeInsets.all(8.0),
+        //  padding: EdgeInsets.only(left: 15),
           children: [
             Card(
+              elevation: 0,
               child: isSwitch
                   ? Column(
                 children: [
@@ -216,31 +220,39 @@ class _NoticeScreenState extends State<NoticeScreen> {
               child: Text('Select Time'),
             ),
             SizedBox(height: size.height/25),
-            ElevatedButton(
-              onPressed: () {
-              if(_formKey.currentState!.validate()){
-                final newSection = Section(
-                  tselected: tSelectedvalue,
-                  cselected: cSelectedvalue,
-                  hour: selectedTime.hour,
-                  minute: selectedTime.minute,
-                );
-                setState(() {
-                  section.add(newSection);
-                });
-                firestore.collection('notices').add({
-                  'teacher': newSection.tselected,
-                  'course': newSection.cselected,
-                  'hour': newSection.hour,
-                  'minute': newSection.minute,
-                });
-                Get.snackbar('Send Notice', 'Succesfully');
+            RoundButton(
+              loading: isloading,
+              textcolor: Colors.white,
+                title: 'Send Notice',
+                onpress: (){
+                  if(_formKey.currentState!.validate()){
+                    final newSection = Section(
+                      tselected: tSelectedvalue,
+                      cselected: cSelectedvalue,
+                      hour: selectedTime.hour,
+                      minute: selectedTime.minute,
+                    );
+                    setState(() {
+                      section.add(newSection);
+                      isloading=true;
+                    });
+                    firestore.collection('notices').add({
+                      'teacher': newSection.tselected,
+                      'course': newSection.cselected,
+                      'hour': newSection.hour,
+                      'minute': newSection.minute,
+                    });
+                    setState(() {
+                      isloading=false;
+                    });
+                    Get.snackbar('Send Notice', 'Succesfully');
 
 
-              }
-              },
-              child: Text('Send Notice'),
-            ),
+                  }
+                }),
+
+
+
           ],
         ),
       ),

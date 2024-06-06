@@ -52,51 +52,65 @@ class _HomeScreenState extends State<HomeScreen> {
       body:Padding(
         padding: const EdgeInsets.only(left: 10,right: 10,top: 45),
         child: FirebaseAnimatedList(
-          query: ref,
+          query: ref.orderByKey(),
+          reverse: true,
           itemBuilder: (BuildContext context, DataSnapshot snapshot,
               Animation<double> animation, int index) {
             final  title=snapshot.child('title').value.toString().toLowerCase();
+            final imageUrl = snapshot.child('image_url').value?.toString() ?? '';
             if(searchController.text.isEmpty){
               return Card(
                 elevation: 1,
                 color: Colors.black12,
-                child: ListTile(
-                    leading: CircleAvatar(child: Text('${index + 1}')),
-                    title: ModifyText(text: snapshot.child('title').value.toString(), size: 20,),
-                    subtitle: ModifyText(text: snapshot.child('description').value.toString(), size: 15) // Assuming 'AddData' is a direct child of your database reference
-                     ,
-                  trailing:PopupMenuButton(
-                    icon: Icon(Icons.more_vert),
-                      itemBuilder: (context)=>[
-                        PopupMenuItem(
-                          value: 1,
-                            //snapshot.child('title').value.toString(),
-                            child: ListTile(
-                              onTap: (){
-                                Navigator.pop(context);
-                               updateData(context,
-                                   snapshot.child('title').value.toString(),
-                                   snapshot.child('description').value.toString(),
-                                   snapshot.child('id').value.toString()
-                               );
+                child: Column(
+                  children: [
+                    imageUrl.isEmpty
+                        ? Text(' No Image')
+                        : Image.network(
+                      imageUrl,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                    ListTile(
+                        leading: CircleAvatar(child: Text('${index + 1}')),
+                        title: ModifyText(text: snapshot.child('title').value.toString(), size: 20,),
+                        subtitle: ModifyText(text: snapshot.child('description').value.toString(), size: 15) // Assuming 'AddData' is a direct child of your database reference
+                         ,
+                      trailing:PopupMenuButton(
+                        icon: Icon(Icons.more_vert),
+                          itemBuilder: (context)=>[
+                            PopupMenuItem(
+                              value: 1,
+                                //snapshot.child('title').value.toString(),
+                                child: ListTile(
+                                  onTap: (){
+                                    Navigator.pop(context);
+                                   updateData(context,
+                                       snapshot.child('title').value.toString(),
+                                       snapshot.child('description').value.toString(),
+                                       snapshot.child('id').value.toString()
+                                   );
 
-                              },
+                                  },
 
-                              leading: Icon(Icons.edit),
+                                  leading: Icon(Icons.edit),
 
-                              title: Text('Edit'),
-                            )),
-                        PopupMenuItem(
-                            value: 2,
-                            child: ListTile(
-                              onTap: (){
-                                Navigator.pop(context);
-                                ref.child(snapshot.child('id').value.toString()).remove();
-                              },
-                              leading: Icon(Icons.delete),
-                              title: Text('Delete'),
-                            )),
-                      ]) ,
+                                  title: Text('Edit'),
+                                )),
+                            PopupMenuItem(
+                                value: 2,
+                                child: ListTile(
+                                  onTap: (){
+                                    Navigator.pop(context);
+                                    ref.child(snapshot.child('id').value.toString()).remove();
+                                  },
+                                  leading: Icon(Icons.delete),
+                                  title: Text('Delete'),
+                                )),
+                          ]) ,
+                    ),
+                  ],
                 ),
               );
             }else if(title.toLowerCase().contains(searchController.text.toLowerCase().toString())){
@@ -108,7 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   elevation: 1,
                   color: Colors.lime,
                   child: ListTile(
-
                       title: ModifyText(text: snapshot.child('title').value.toString(),
                         size: 20, ),
                       subtitle: ModifyText(

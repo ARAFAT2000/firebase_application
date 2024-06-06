@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:neumorphic_ui/neumorphic_ui.dart';
+
 
 import '../widget/re_useable.dart';
 
