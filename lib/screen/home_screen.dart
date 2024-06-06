@@ -60,8 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
             final imageUrl = snapshot.child('image_url').value?.toString() ?? '';
             if(searchController.text.isEmpty){
               return Card(
-                elevation: 1,
-                color: Colors.black12,
+                elevation: 2,
+                color: Colors.white,
                 child: Column(
                   children: [
                     imageUrl.isEmpty
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       fit: BoxFit.cover,
                     ),
                     ListTile(
-                        leading: CircleAvatar(child: Text('${index + 1}')),
+                        //leading: CircleAvatar(child: Text('${index + 1}')),
                         title: ModifyText(text: snapshot.child('title').value.toString(), size: 20,),
                         subtitle: ModifyText(text: snapshot.child('description').value.toString(), size: 15) // Assuming 'AddData' is a direct child of your database reference
                          ,
