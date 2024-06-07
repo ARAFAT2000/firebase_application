@@ -46,6 +46,7 @@ dependencies:
   fluttertoast: ^8.0.9
   image_picker: ^1.1.1
   persistent_bottom_nav_bar_v2: ^5.2.3
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,7 @@ flutter:
   assets:
     - assets/images/email.jpg
     - assets/images/facebook.jpg
+    - assets/images/group.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

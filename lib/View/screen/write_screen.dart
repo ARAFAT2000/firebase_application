@@ -1,4 +1,4 @@
-import 'package:firebase_application/utils/button.dart';
+
 import 'package:firebase_application/utils/modify_text.dart';
 import 'package:firebase_application/utils/textform-field.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -8,14 +8,18 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class AddScreen extends StatefulWidget {
-  const AddScreen({super.key});
+import '../../utils/round_botton.dart';
+
+
+
+class WriteScreen extends StatefulWidget {
+  const WriteScreen({super.key});
 
   @override
-  State<AddScreen> createState() => _AddScreenState();
+  State<WriteScreen> createState() => _WriteScreenState();
 }
 
-class _AddScreenState extends State<AddScreen> {
+class _WriteScreenState extends State<WriteScreen> {
   final titleController = TextEditingController();
   final desController = TextEditingController();
 
@@ -71,7 +75,7 @@ class _AddScreenState extends State<AddScreen> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: ModifyText(text: 'Add Your Thoughts', size: 20),
+        title: ModifyText(text: 'Create Class Notice', size: 20),
         backgroundColor: Colors.black12,
       ),
       body: Column(
@@ -113,7 +117,7 @@ class _AddScreenState extends State<AddScreen> {
                       Center(
                         child: imageUrl == null
                             ? Icon(Icons.person, size: 150)
-                            : Image.network(imageUrl!),
+                            : Image.network(imageUrl!,height: 150,width: 150,),
                       ),
                       TextButton(
                         onPressed: () {
@@ -121,7 +125,8 @@ class _AddScreenState extends State<AddScreen> {
                         },
                         child: Text('Select Image'),
                       ),
-                      RoundButtonadd(
+
+                      RoundButton(
                         loading: loading,
                         title: 'Submit',
                         onpress: () {
@@ -156,8 +161,8 @@ class _AddScreenState extends State<AddScreen> {
                             });
                           }
                         },
-                        color: Colors.black54,
-                        textcolor: Colors.white,
+
+
                       ),
                     ],
                   ),

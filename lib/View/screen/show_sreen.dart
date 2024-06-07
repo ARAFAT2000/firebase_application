@@ -5,18 +5,18 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 
+import '../../widget/update_data.dart';
 
-import '../widget/update_data.dart';
 
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class ShowScreen extends StatefulWidget {
+  const ShowScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ShowScreen> createState() => _ShowScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _ShowScreenState extends State<ShowScreen> {
 
   DatabaseReference ref= FirebaseDatabase.instance.ref().child('AddData');
   final searchController= TextEditingController();
@@ -29,15 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
 
       appBar: AppBar(
-
         elevation: 0,
+
         title: Padding(
           padding: const EdgeInsets.only(left: 45,right: 10),
           child: TextFormField(
             controller: searchController,
             decoration: InputDecoration(
                 hintText: 'Search here',
-              suffixIcon: Icon(Icons.clear)
             ),
             onChanged: (String  value){
               setState(() {
@@ -68,12 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? Text(' No Image')
                         : Image.network(
                       imageUrl,
-                      height: 150,
+                      height: size.height/3,
                       width: double.infinity,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.fill,
                     ),
                     ListTile(
-                        //leading: CircleAvatar(child: Text('${index + 1}')),
+
                         title: ModifyText(text: snapshot.child('title').value.toString(), size: 20,),
                         subtitle: ModifyText(text: snapshot.child('description').value.toString(), size: 15) // Assuming 'AddData' is a direct child of your database reference
                          ,
@@ -82,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (context)=>[
                             PopupMenuItem(
                               value: 1,
-                                //snapshot.child('title').value.toString(),
+
                                 child: ListTile(
                                   onTap: (){
                                     Navigator.pop(context);

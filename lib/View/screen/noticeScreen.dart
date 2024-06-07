@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_application/utils/button_c.dart';
-import 'package:firebase_application/utils/textform-field.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Model/section_model.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_application/utils/round_botton.dart';
+import 'package:firebase_application/utils/textform-field.dart';
+
+import '../../Model/section_model.dart';
 
 class NoticeScreen extends StatefulWidget {
   const NoticeScreen({super.key});
@@ -18,14 +21,18 @@ class _NoticeScreenState extends State<NoticeScreen> {
   List<DropdownMenuItem<String>> coursename = [];
   String tSelectedvalue = '';
   String cSelectedvalue = '';
+  String examtypeselected = '';
   List<Section> section = [];
-  TimeOfDay selectedTime = TimeOfDay.now();
+
   bool isloading = false;
+
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
 
   final teacherController = TextEditingController();
   final courseController = TextEditingController();
   bool isSwitch = false;
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final DatabaseReference firestore = FirebaseDatabase.instance.ref().child('Notice');
 
   @override
   void initState() {
@@ -70,6 +77,11 @@ class _NoticeScreenState extends State<NoticeScreen> {
     }
   }
 
+  String formatDateTime(DateTime date) {
+    final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+    return dateFormatter.format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -77,6 +89,9 @@ class _NoticeScreenState extends State<NoticeScreen> {
       appBar: AppBar(
         actions: [
           Switch(
+
+            activeColor: Colors.green[600],
+            inactiveThumbColor: Colors.white,
             value: isSwitch,
             onChanged: (value) {
               setState(() {
@@ -85,14 +100,13 @@ class _NoticeScreenState extends State<NoticeScreen> {
             },
           ),
           SizedBox(
-            width: size.width/20,
+            width: size.width / 20,
           )
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 15,right: 15,top: 20),
+        padding: const EdgeInsets.only(left: 15, right: 15, top: 20),
         child: ListView(
-        //  padding: EdgeInsets.only(left: 15),
           children: [
             Card(
               elevation: 0,
@@ -169,7 +183,8 @@ class _NoticeScreenState extends State<NoticeScreen> {
                     flex: 1,
                     child: DropdownButtonFormField(
                       onSaved: (value) => tSelectedvalue = value ?? '',
-                      validator: (value) => value == null ? "Select a teacher" : null,
+                      validator: (value) =>
+                      value == null ? "Select a teacher" : null,
                       items: teachername,
                       onChanged: (String? value) {
                         setState(() {
@@ -186,7 +201,8 @@ class _NoticeScreenState extends State<NoticeScreen> {
                     flex: 1,
                     child: DropdownButtonFormField(
                       onSaved: (value) => cSelectedvalue = value ?? '',
-                      validator: (value) => value == null ? "Select a course" : null,
+                      validator: (value) =>
+                      value == null ? "Select a course" : null,
                       items: coursename,
                       onChanged: (String? value) {
                         setState(() {
@@ -201,58 +217,119 @@ class _NoticeScreenState extends State<NoticeScreen> {
                 ],
               ),
             ),
-            SizedBox(height: size.height/12),
-            Center(child: Text(' Time : ${selectedTime.hour} : ${selectedTime.minute}')),
-            SizedBox(height: size.height/25),
+            DropdownButtonFormField<String>(
+              items: [
+                DropdownMenuItem(
+                  value: 'Class Test',
+                  child: Text('Class Test'),
+                ),
+                DropdownMenuItem(
+                  value: 'Mid',
+                  child: Text('Mid'),
+                ),
+              ],
+              onSaved: (value) => examtypeselected = value ?? '',
+              validator: (value) => value == null ? "Select Exam Type" : null,
+              onChanged: (value) {
+                setState(() {
+                  examtypeselected = value!;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Select Exam Type',
+              ),
+            ),
+
+            SizedBox(height: size.height / 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    selectedTime != null
+                        ? ' Time: ${selectedTime!.hour} : ${selectedTime!.minute}'
+                        : 'No time selected',
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    selectedDate != null
+                        ? 'Date: ${formatDateTime(selectedDate!)}'
+                        : 'No Date selected',
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: size.height / 25),
             ElevatedButton(
               onPressed: () async {
-                final TimeOfDay? timeofday = await showTimePicker(
+                final DateTime? date = await showDatePicker(
                   context: context,
-                  initialTime: selectedTime,
-                  initialEntryMode: TimePickerEntryMode.dial,
+                  initialDate: selectedDate ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2101),
                 );
-                if (timeofday != null) {
-                  setState(() {
-                    selectedTime = timeofday;
-                  });
+
+                if (date != null) {
+                  final TimeOfDay? time = await showTimePicker(
+                    context: context,
+                    initialTime: selectedTime ?? TimeOfDay.now(),
+                    initialEntryMode: TimePickerEntryMode.dial,
+                  );
+
+                  if (time != null) {
+                    setState(() {
+                      selectedDate = date;
+                      selectedTime = time;
+                    });
+                  }
                 }
               },
-              child: Text('Select Time'),
+              child: Text('Select Date and Time'),
             ),
-            SizedBox(height: size.height/25),
+            SizedBox(height: size.height / 25),
             RoundButton(
               loading: isloading,
               textcolor: Colors.white,
-                title: 'Send Notice',
-                onpress: (){
-                  if(_formKey.currentState!.validate()){
-                    final newSection = Section(
-                      tselected: tSelectedvalue,
-                      cselected: cSelectedvalue,
-                      hour: selectedTime.hour,
-                      minute: selectedTime.minute,
-                    );
+              title: 'Send Notice',
+              onpress: () {
+                if (_formKey.currentState!.validate()) {
+                  final newSection = Section(
+                    tselected: tSelectedvalue,
+                    examtype: examtypeselected,
+                    cselected: cSelectedvalue,
+                    hour: selectedTime!.hour,
+                    minute: selectedTime!.minute,
+                    date: selectedDate!,
+                  );
+                  setState(() {
+                    section.add(newSection);
+                    isloading = true;
+                  });
+                  String id = DateTime.now().millisecondsSinceEpoch.toString();
+                  Map<String,dynamic> noticeInformation={
+                    'teacher': newSection.tselected,
+                    'course': newSection.cselected,
+                    'hour': newSection.hour,
+                    'minute': newSection.minute,
+                    'date': newSection.date.toIso8601String(),
+                    'examtype':newSection.examtype,
+                    'id':id
+                  };
+                  firestore.child(id).set(noticeInformation)
+                 .then((_) {
                     setState(() {
-                      section.add(newSection);
-                      isloading=true;
+                      isloading = false;
                     });
-                    firestore.collection('notices').add({
-                      'teacher': newSection.tselected,
-                      'course': newSection.cselected,
-                      'hour': newSection.hour,
-                      'minute': newSection.minute,
-                    });
+                    Get.snackbar('Send Notice', 'Successfully sent notice');
+                  }).catchError((error) {
                     setState(() {
-                      isloading=false;
+                      isloading = false;
                     });
-                    Get.snackbar('Send Notice', 'Succesfully');
-
-
-                  }
-                }),
-
-
-
+                    Get.snackbar('Error', 'Failed to send notice: $error');
+                  });
+                }
+              },
+            ),
           ],
         ),
       ),

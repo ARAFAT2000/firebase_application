@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../splass Services/splass_services.dart';
+import '../../View_Model/splass Services/splass_services.dart';
+
+
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -21,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: SafeArea(
           child:Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -30,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
               //Image(image: AssetImage('assets/images/logo.jpg')),
               Padding(
                 padding:  EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: Text('Arafat Media' ,
+                child: Center(child: Text('Student App' ,
                   style: TextStyle( fontSize: 40, fontWeight: FontWeight.w700),)),
               )
             ],
